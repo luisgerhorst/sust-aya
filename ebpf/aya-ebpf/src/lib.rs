@@ -28,6 +28,13 @@ pub mod helpers;
 pub mod maps;
 pub mod programs;
 
+// sust:
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(non_camel_case_types)]
+#[allow(dead_code)]
+pub mod cgroup_skb_egress_bindings;
+
 use core::ffi::c_void;
 
 pub use aya_ebpf_cty as cty;
