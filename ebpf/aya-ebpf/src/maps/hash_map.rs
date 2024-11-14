@@ -85,13 +85,49 @@ impl<K, V> HashMap<K, V> {
     }
 }
 
-impl<K> HashMap<K, u32> {
-    /// Retrieve the value associate with `key` from the map. This can not lead
-    /// to memory/type-safety bugs because a corrupt scalar can only lead to
-    /// logic bugs.
-    #[inline]
-    pub fn get_corrupt_u32(&self, key: &K) -> Option<&u32> {
-        unsafe { get(self.def.get(), key) }
+//  TODO: Define eBPF atomic that can be put into a hash map?
+//  https://lore.kernel.org/bpf/20210114181751.768687-1-jackmanb@google.com/t/#u
+
+pub struct EbpfAtomicI64 {
+    value: i64,
+    zero: i64,
+}
+
+impl Default for EbpfAtomicI64 {
+    fn default() -> EbpfAtomicI64 {
+        EbpfAtomicI64 {
+            value: 0,
+            zero: 0,
+        }
+    }
+}
+
+impl EbpfAtomicI64 {
+
+    // TODO: Receive and respect ordering param.
+    pub fn load(&self) -> i64 {
+        // SAFETY: any data races are prevented by atomic intrinsics and the raw
+        // pointer passed in is valid because we got it from a reference.
+        let r = &self.value as *const i64 as *mut i64;
+        // TODO: prevent compiler from optimizing add with 0 to xor which is unsupported without extra self.zero (memory usage)
+        //
+        // https://doc.rust-lang.org/src/core/sync/atomic.rs.html#3082-3098
+        // https://doc.rust-lang.org/stable/src/core/intrinsics.rs.html#345
+        // https://github.com/search?q=repo%3Allvm%2Fllvm-project+bpf+atomic&type=commits
+        // https://github.com/aya-rs/aya/issues/588
+        unsafe { core::intrinsics::atomic_xadd_acquire(r, self.zero) }
+    }
+
+}
+
+impl<K> HashMap<K, EbpfAtomicI64> {
+    pub fn atomic_get_i64(&self, key: &K) -> Option<i64> {
+        unsafe {
+            match self.get(key) {
+                Some(value) => Some(value.load()),
+                None => None
+            }
+        }
     }
 }
 

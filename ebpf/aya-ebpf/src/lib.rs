@@ -20,6 +20,12 @@
 #![warn(clippy::cast_lossless, clippy::cast_sign_loss)]
 #![no_std]
 
+// For EbpfAtomic
+#![allow(internal_features)]
+#![feature(core_intrinsics)]
+#![feature(allow_internal_unstable)]
+#![feature(decl_macro)]
+
 pub use aya_ebpf_bindings::bindings;
 
 mod args;

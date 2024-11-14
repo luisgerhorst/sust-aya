@@ -22,7 +22,7 @@ pub mod xdp;
 
 pub use array::Array;
 pub use bloom_filter::BloomFilter;
-pub use hash_map::{HashMap, LruHashMap, LruPerCpuHashMap, PerCpuHashMap};
+pub use hash_map::{HashMap, LruHashMap, LruPerCpuHashMap, PerCpuHashMap, EbpfAtomicI64};
 pub use lpm_trie::LpmTrie;
 pub use per_cpu_array::PerCpuArray;
 pub use perf::{PerfEventArray, PerfEventByteArray};
