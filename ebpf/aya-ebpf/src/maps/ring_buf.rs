@@ -33,6 +33,11 @@ unsafe impl Sync for RingBuf {}
 #[must_use = "eBPF verifier requires ring buffer entries to be either submitted or discarded"]
 pub struct RingBufEntry<T: 'static>(&'static mut MaybeUninit<T>);
 
+pub fn maybeuninit_fill_with_value<T>(mut allocation: MaybeUninit<T>, value: T) {
+    allocation.write(value);
+    unsafe { allocation.assume_init() };
+}
+
 impl<T> Deref for RingBufEntry<T> {
     type Target = MaybeUninit<T>;
 

@@ -19,12 +19,17 @@
 #![deny(warnings)]
 #![warn(clippy::cast_lossless, clippy::cast_sign_loss)]
 #![no_std]
+#![feature(const_black_box)]
 
 // For EbpfAtomic
 #![allow(internal_features)]
 #![feature(core_intrinsics)]
 #![feature(allow_internal_unstable)]
 #![feature(decl_macro)]
+
+// For ManuallyDrop testing
+#![feature(lang_items)]
+#![feature(rustc_attrs)]
 
 pub use aya_ebpf_bindings::bindings;
 
@@ -141,4 +146,9 @@ pub fn check_bounds_signed(value: i64, lower: i64, upper: i64) -> bool {
         let _ = upper;
         unimplemented!()
     }
+}
+
+#[inline]
+pub const fn black_box<T>(dummy: T) -> T {
+    core::intrinsics::black_box(dummy)
 }

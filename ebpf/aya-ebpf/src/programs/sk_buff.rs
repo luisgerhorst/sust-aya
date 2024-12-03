@@ -12,6 +12,7 @@ use aya_ebpf_cty::c_long;
 
 use crate::{bindings::__sk_buff, EbpfContext};
 
+#[derive(Copy, Clone)]
 pub struct SkBuff {
     pub skb: *mut __sk_buff,
 }
@@ -260,6 +261,7 @@ impl SkBuff {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct SkBuffContext {
     pub skb: SkBuff,
 }
