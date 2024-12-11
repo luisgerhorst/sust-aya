@@ -33,9 +33,8 @@ unsafe impl Sync for RingBuf {}
 #[must_use = "eBPF verifier requires ring buffer entries to be either submitted or discarded"]
 pub struct RingBufEntry<T: 'static>(&'static mut MaybeUninit<T>);
 
-pub fn maybeuninit_fill_with_value<T>(mut allocation: MaybeUninit<T>, value: T) {
+pub fn maybeuninit_fill_with_value<T>(allocation: &mut MaybeUninit<T>, value: T) {
     allocation.write(value);
-    unsafe { allocation.assume_init() };
 }
 
 impl<T> Deref for RingBufEntry<T> {
@@ -59,7 +58,9 @@ impl<T> RingBufEntry<T> {
     }
 
     /// Commit this ring buffer entry. The entry will be made visible to the userspace reader.
-    pub fn submit(self, flags: u64) {
+    pub fn submit(mut self, value: T, flags: u64) {
+        // Might seem dumb, but don't worry the compiler can optimize value T out.
+        self.write(value);
         unsafe { bpf_ringbuf_submit(self.0.as_mut_ptr() as *mut _, flags) };
     }
 }
